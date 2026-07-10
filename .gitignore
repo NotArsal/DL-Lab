@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Jupyter Notebook
+.ipynb_checkpoints
+*/.ipynb_checkpoints/
+
+# Virtual Environments
+venv/
+env/
+.env
+
+# Datasets & Temp Caches
+data/
+temp_friend_repo/
+Ass5/Nitish Assignment 5/
+Ass5/Pranav Assignment 5/
+Ass7/friends assignments/
+
+# OS generated files
+.DS_Store
+Thumbs.db
