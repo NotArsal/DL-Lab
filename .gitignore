@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Jupyter Notebook
+.ipynb_checkpoints
+*/.ipynb_checkpoints/
+
+# Virtual Environments
+venv/
+env/
+.env
+
+# Datasets (Uncomment if you want to exclude large data files from GitHub)
+# */Datasets/*.csv
+# */Datasets/*.zip
+
+# OS generated files
+.DS_Store
+Thumbs.db
