@@ -16,6 +16,8 @@ The repository is structured by assignment. Each folder contains the Jupyter Not
   * Single-Layer Perceptron built from scratch using NumPy to understand weights, biases, and activation functions.
 * **[Assignment 3: Forward/Backpropagation & Hyperparameters](./Ass3/EXPLANATION.md)**
   * Deep Neural Network on CIFAR-10. Analyzes the impact of varying learning rates and epoch counts on model convergence.
+* **[Assignment 4: LSTM Time-Series Forecasting](./Ass4/EXPLANATION.md)**
+  * Recurrent Neural Network built with Keras Functional API. Uses historical Apple (AAPL) stock data to predict future closing prices via Long Short-Term Memory cells.
 * **[Assignment 6: Custom CNN for Image Classification](./Ass6/EXPLANATION.md)**
   * A 4-block Convolutional Neural Network with data augmentation to classify a unique Mango Leaf & Fruit Pathology dataset.
 
