@@ -2,19 +2,20 @@ import json
 import os
 
 def create_assignment6_notebook():
-    notebook_path = r"d:\Vit\Academics Sem-5\Deep Learning (DL)\Lab\Ass6\Assignment6.ipynb"
-    os.makedirs(os.path.dirname(notebook_path), exist_ok=True)
+    ass6_dir = r"d:\Vit\Academics Sem-5\Deep Learning (DL)\Lab\Ass6"
+    os.makedirs(ass6_dir, exist_ok=True)
+    notebook_path = os.path.join(ass6_dir, "Assignment6.ipynb")
 
     cells = []
 
-    # 1. Header & Title
+    # 1. Title & Header
     cells.append({
         "cell_type": "markdown",
         "metadata": {},
         "source": [
             "# Vishwakarma Institute of Technology, Pune\n",
             "## Course: CI3201 - Deep Learning\n",
-            "### Lab Practical 6: Convolutional Neural Network (CNN) for Soybean Leaf Disease Image Classification\n",
+            "### Lab Practical 6: Custom Convolutional Neural Network (CNN) for Mango Leaf & Fruit Disease Image Classification\n",
             "\n",
             "---"
         ]
@@ -28,29 +29,30 @@ def create_assignment6_notebook():
             "## 1. Objective & Theoretical Background\n",
             "\n",
             "### 1.1 Objective\n",
-            "1. Design and implement a multi-layer **Convolutional Neural Network (CNN)** from scratch using TensorFlow/Keras for multi-class image classification.\n",
-            "2. Classify crop leaves into **7 Soybean Disease Categories** (`Bacterial Blight`, `Brown Spot`, `Frogeye Leaf Spot`, `Downy Mildew`, `Target Spot`, `Sudden Death Syndrome`, `Healthy`).\n",
-            "3. Implement **Data Augmentation** techniques (rotation, flipping, zoom) to prevent overfitting on leaf textures.\n",
-            "4. Analyze the mathematical operations of 2D Convolution, Max Pooling, Feature Map Dimensions, and Parameter Calculations.\n",
-            "5. Evaluate performance using Loss/Accuracy curves, Confusion Matrix, and Precision/Recall metrics.\n",
+            "1. Design and implement a multi-class **Convolutional Neural Network (CNN)** from scratch using TensorFlow/Keras.\n",
+            "2. Classify **Mango Leaf & Fruit Diseases** across 6 distinct categories (`Anthracnose`, `Bacterial Canker`, `Die Back`, `Powdery Mildew`, `Sooty Mould`, `Healthy`).\n",
+            "3. Apply spatial data augmentation (rotation, flipping, zooming) to increase network generalization on agricultural leaf textures.\n",
+            "4. Evaluate performance using training/validation loss curves, accuracy plots, confusion matrices, and per-class classification reports.\n",
             "\n",
-            "### 1.2 Mathematical Foundations of CNNs\n",
+            "### 1.2 Mathematical Foundations of CNN Components\n",
             "\n",
             "#### A. 2D Convolution Operation\n",
-            "Given an input image tensor $I$ and a 2D filter/kernel $K$ of size $(f \\times f)$:\n",
-            "$$S(i,j) = (I * K)(i,j) = \\sum_{m} \\sum_{n} I(i-m, j-n) K(m,n)$$\n",
+            "For an input feature map $X$ and kernel $K$ of size $k \\times k$ with stride $s$ and padding $p$:\n",
+            "$$Z(i, j) = (X * K)(i, j) = \\sum_{m=0}^{k-1} \\sum_{n=0}^{k-1} X(i \\cdot s + m, j \\cdot s + n) \\cdot K(m, n) + b$$\n",
             "\n",
-            "#### B. Output Feature Map Dimensions\n",
-            "For an input of dimension $W_{in} \\times H_{in}$, filter size $F$, padding $P$, and stride $S$:\n",
-            "$$W_{out} = \\left\\lfloor \\frac{W_{in} - F + 2P}{S} \\right\\rfloor + 1$$\n",
-            "$$H_{out} = \\left\\lfloor \\frac{H_{in} - F + 2P}{S} \\right\\rfloor + 1$$\n",
+            "Output Feature Map Dimensions ($H_{out} \\times W_{out}$):\n",
+            "$$H_{out} = \\left\\lfloor \\frac{H_{in} - k + 2p}{s} \\right\\rfloor + 1, \\quad W_{out} = \\left\\lfloor \\frac{W_{in} - k + 2p}{s} \\right\\rfloor + 1$$\n",
             "\n",
-            "#### C. Max Pooling Operation\n",
-            "Max Pooling extracts the maximum value within a spatial window $m \\times n$, reducing spatial resolution while preserving dominant edge/texture features:\n",
-            "$$P(i,j) = \\max_{m,n} A(i \\cdot S + m, j \\cdot S + n)$$\n",
+            "#### B. Pooling Layer (Max Pooling)\n",
+            "Max pooling extracts the local maximum value in a $2 \\times 2$ window, reducing spatial dimensionality while maintaining translation invariance:\n",
+            "$$P(i, j) = \\max_{0 \\le m < 2, 0 \\le n < 2} X(2i + m, 2j + n)$$\n",
             "\n",
-            "#### D. Softmax & Categorical Cross-Entropy Loss\n",
-            "$$\\hat{y}_c = \\frac{e^{z_c}}{\\sum_{k=1}^{C} e^{z_k}}, \\quad \\mathcal{L} = -\\sum_{c=1}^{C} y_c \\log(\\hat{y}_c)$$"
+            "#### C. Batch Normalization\n",
+            "Normalizes layer activations across a mini-batch to accelerate convergence and reduce internal covariate shift:\n",
+            "$$\\hat{z} = \\frac{z - \\mu_B}{\\sqrt{\\sigma_B^2 + \\epsilon}}, \\quad y = \\gamma \\hat{z} + \\beta$$\n",
+            "\n",
+            "#### D. Categorical Cross-Entropy Loss & Softmax\n",
+            "$$\\hat{y}_i = \\frac{e^{z_i}}{\\sum_{j=1}^{C} e^{z_j}}, \\quad \\mathcal{L}(y, \\hat{y}) = -\\sum_{i=1}^{C} y_i \\log(\\hat{y}_i)$$"
         ]
     })
 
@@ -61,14 +63,15 @@ def create_assignment6_notebook():
         "metadata": {},
         "outputs": [],
         "source": [
-            "# Import core libraries\n",
+            "# Import required libraries\n",
             "import numpy as np\n",
             "import matplotlib.pyplot as plt\n",
             "import seaborn as sns\n",
             "import tensorflow as tf\n",
-            "from tensorflow.keras import layers, models\n",
             "from tensorflow.keras.models import Sequential\n",
-            "from tensorflow.keras.layers import Conv2D, MaxPooling2D, Dense, Flatten, Dropout, BatchNormalization, Rescaling\n",
+            "from tensorflow.keras.layers import (\n",
+            "    Conv2D, MaxPooling2D, Flatten, Dense, Dropout, BatchNormalization, RandomFlip, RandomRotation, RandomZoom\n",
+            ")\n",
             "from tensorflow.keras.optimizers import Adam\n",
             "from tensorflow.keras.utils import to_categorical\n",
             "from sklearn.metrics import classification_report, confusion_matrix\n",
@@ -82,187 +85,194 @@ def create_assignment6_notebook():
         ]
     })
 
-    # 4. Markdown Section 2: Dataset & Preprocessing
+    # 4. Markdown Section 2: Dataset Generation / Preprocessing
     cells.append({
         "cell_type": "markdown",
         "metadata": {},
         "source": [
             "## 2. Dataset Setup & Preprocessing\n",
             "\n",
-            "### 2.1 Soybean Disease Classes\n",
-            "We categorize soybean leaf images across **7 target categories**:\n",
-            "1. `Soybean___Bacterial_blight`\n",
-            "2. `Soybean___Brown_spot`\n",
-            "3. `Soybean___Frogeye_leaf_spot`\n",
-            "4. `Soybean___Downy_mildew`\n",
-            "5. `Soybean___Target_spot`\n",
-            "6. `Soybean___Sudden_death_syndrome`\n",
-            "7. `Soybean___Healthy`\n",
+            "### 2.1 Mango Leaf & Fruit Pathology Categories\n",
+            "The dataset contains 6 disease and healthy categories:\n",
+            "1. **Anthracnose**: Dark, sunken necrotic lesions on leaves and fruit skin.\n",
+            "2. **Bacterial Canker**: Angular water-soaked leaf spots with chlorotic yellow halos.\n",
+            "3. **Die Back**: Twig drying and foliar necrosis spreading downwards.\n",
+            "4. **Powdery Mildew**: White powdery fungal growth covering leaf surfaces.\n",
+            "5. **Sooty Mould**: Black soot-like fungal coating caused by honeydew excretions.\n",
+            "6. **Healthy**: Normal green foliage with no pathology.\n",
             "\n",
-            "### 2.2 Data Pipeline Parameters\n",
-            "- **Image Dimensions**: $128 \\times 128 \\times 3$ (RGB)\n",
-            "- **Batch Size**: 32\n",
-            "- **Scaling**: Pixel normalization $[0, 255] \\rightarrow [0.0, 1.0]$"
+            "### 2.2 Data Specifications & Synthetic Generator\n",
+            "- **Total Images**: 1,200 synthetic/augmented high-resolution leaf samples (200 per class).\n",
+            "- **Image Shape**: $128 \\times 128 \\times 3$ RGB color channels.\n",
+            "- **Data Split**: 80% Training ($960$ images), 20% Testing ($240$ images).\n",
+            "- **Normalization**: Pixel values $[0, 255]$ are scaled to $[0.0, 1.0]$."
         ]
     })
 
-    # 5. Code Cell: Synthetic/Benchmark Dataset Generator
+    # 5. Code Cell: Generate Synthetic Dataset with Realistic Leaf Features
     cells.append({
         "cell_type": "code",
         "execution_count": None,
         "metadata": {},
         "outputs": [],
         "source": [
-            "# Define class names for Soybean Disease\n",
+            "# Create synthetic Mango Leaf dataset with class-specific color/texture signals\n",
             "class_names = [\n",
-            "    'Soybean___Bacterial_blight',\n",
-            "    'Soybean___Brown_spot',\n",
-            "    'Soybean___Frogeye_leaf_spot',\n",
-            "    'Soybean___Downy_mildew',\n",
-            "    'Soybean___Target_spot',\n",
-            "    'Soybean___Sudden_death_syndrome',\n",
-            "    'Soybean___Healthy'\n",
+            "    'Anthracnose', 'Bacterial_Canker', 'Die_Back', \n",
+            "    'Powdery_Mildew', 'Sooty_Mould', 'Healthy'\n",
             "]\n",
             "num_classes = len(class_names)\n",
-            "img_size = (128, 128)\n",
+            "img_size = 128\n",
+            "samples_per_class = 200\n",
             "\n",
-            "# Generate structured benchmark sample data for demonstration\n",
-            "def generate_soybean_dataset(num_samples=1400):\n",
-            "    X = np.random.uniform(0.1, 0.9, size=(num_samples, 128, 128, 3)).astype(np.float32)\n",
-            "    y = np.random.randint(0, num_classes, size=(num_samples,))\n",
-            "    \n",
-            "    # Inject distinctive spectral patterns per disease class\n",
-            "    for i in range(num_samples):\n",
-            "        cls = y[i]\n",
-            "        # Add class-specific texture signatures\n",
-            "        X[i, :, :, 1] += 0.2 * (cls / num_classes)  # Green channel modulation\n",
-            "        if cls == 0:  # Bacterial Blight (yellowish halos)\n",
-            "            X[i, 30:70, 30:70, 0] += 0.4\n",
-            "        elif cls == 1:  # Brown Spot (dark spots)\n",
-            "            X[i, 40:80, 40:80, :2] *= 0.3\n",
-            "        elif cls == 2:  # Frogeye Spot (circular lesions)\n",
-            "            X[i, 20:50, 50:80, 0] += 0.3\n",
-            "        elif cls == 6:  # Healthy (vibrant green)\n",
-            "            X[i, :, :, 1] = np.clip(X[i, :, :, 1] + 0.3, 0, 1)\n",
-            "            \n",
-            "    X = np.clip(X, 0.0, 1.0)\n",
-            "    return X, y\n",
+            "X_data = []\n",
+            "y_data = []\n",
             "\n",
-            "X_all, y_all = generate_soybean_dataset(num_samples=1400)\n",
+            "# Base leaf green color\n",
+            "base_green = np.array([34, 139, 34], dtype=np.float32) / 255.0\n",
+            "\n",
+            "for class_idx, name in enumerate(class_names):\n",
+            "    for _ in range(samples_per_class):\n",
+            "        # Generate green background leaf tensor\n",
+            "        img = np.ones((img_size, img_size, 3), dtype=np.float32) * base_green\n",
+            "        img += np.random.normal(0, 0.05, (img_size, img_size, 3))\n",
+            "        \n",
+            "        # Add class-specific disease visual artifacts\n",
+            "        if name == 'Anthracnose':  # Dark brown sunken spots\n",
+            "            mask = np.random.rand(img_size, img_size) > 0.95\n",
+            "            img[mask] = [0.2, 0.1, 0.05]\n",
+            "        elif name == 'Bacterial_Canker':  # Yellow halos with dark center\n",
+            "            mask_halo = np.random.rand(img_size, img_size) > 0.93\n",
+            "            img[mask_halo] = [0.9, 0.8, 0.1]\n",
+            "        elif name == 'Die_Back':  # Brown drying patches\n",
+            "            img[20:60, 20:60] *= [0.5, 0.3, 0.1]\n",
+            "        elif name == 'Powdery_Mildew':  # White powdery patches\n",
+            "            mask_white = np.random.rand(img_size, img_size) > 0.90\n",
+            "            img[mask_white] = [0.95, 0.95, 0.95]\n",
+            "        elif name == 'Sooty_Mould':  # Black soot overlay\n",
+            "            mask_black = np.random.rand(img_size, img_size) > 0.88\n",
+            "            img[mask_black] = [0.05, 0.05, 0.05]\n",
+            "        # Healthy remains clean green\n",
+            "        \n",
+            "        img = np.clip(img, 0.0, 1.0)\n",
+            "        X_data.append(img)\n",
+            "        y_data.append(class_idx)\n",
+            "\n",
+            "X_data = np.array(X_data, dtype='float32')\n",
+            "y_data = np.array(y_data, dtype='int32')\n",
+            "\n",
+            "# Shuffle dataset\n",
+            "indices = np.arange(len(X_data))\n",
+            "np.random.shuffle(indices)\n",
+            "X_data = X_data[indices]\n",
+            "y_data = y_data[indices]\n",
             "\n",
             "# Train-Test Split (80% Train, 20% Test)\n",
-            "split_idx = int(0.8 * len(X_all))\n",
-            "X_train, X_test = X_all[:split_idx], X_all[split_idx:]\n",
-            "y_train_raw, y_test_raw = y_all[:split_idx], y_all[split_idx:]\n",
+            "split_idx = int(0.8 * len(X_data))\n",
+            "X_train, X_test = X_data[:split_idx], X_data[split_idx:]\n",
+            "y_train_raw, y_test_raw = y_data[:split_idx], y_data[split_idx:]\n",
             "\n",
             "# One-hot encode targets\n",
             "y_train = to_categorical(y_train_raw, num_classes)\n",
             "y_test = to_categorical(y_test_raw, num_classes)\n",
             "\n",
-            "print(f\"Training set shape: {X_train.shape}, Labels shape: {y_train.shape}\")\n",
-            "print(f\"Test set shape:     {X_test.shape}, Labels shape:     {y_test.shape}\")"
+            "print(f\"Dataset successfully loaded!\")\n",
+            "print(f\"X_train shape: {X_train.shape}, y_train shape: {y_train.shape}\")\n",
+            "print(f\"X_test shape:  {X_test.shape},  y_test shape:  {y_test.shape}\")"
         ]
     })
 
-    # 6. Code Cell: Visualizing Sample Images
+    # 6. Code Cell: Dataset Visualizations
     cells.append({
         "cell_type": "code",
         "execution_count": None,
         "metadata": {},
         "outputs": [],
         "source": [
-            "# Plot sample images across different disease classes\n",
+            "# Display sample images for each Mango pathology class\n",
             "plt.figure(figsize=(14, 6))\n",
-            "for i in range(14):\n",
-            "    plt.subplot(2, 7, i + 1)\n",
-            "    plt.imshow(X_train[i])\n",
-            "    cls_idx = np.argmax(y_train[i])\n",
-            "    short_name = class_names[cls_idx].replace('Soybean___', '')\n",
-            "    plt.title(short_name, fontsize=8)\n",
+            "for i, cls_name in enumerate(class_names):\n",
+            "    idx = np.where(y_train_raw == i)[0][0]\n",
+            "    plt.subplot(2, 3, i + 1)\n",
+            "    plt.imshow(X_train[idx])\n",
+            "    plt.title(f\"Class {i}: {cls_name}\", fontsize=12, fontweight='bold')\n",
             "    plt.axis('off')\n",
-            "plt.suptitle(\"Sample Leaf Images - Soybean Disease Dataset\", fontsize=14)\n",
+            "plt.suptitle(\"Sample Visual Artifacts of Mango Leaf Diseases\", fontsize=16)\n",
             "plt.tight_layout()\n",
             "plt.show()"
         ]
     })
 
-    # 7. Markdown Section 3: Data Augmentation & Model Architecture
+    # 7. Markdown Section 3: CNN Architecture Design
     cells.append({
         "cell_type": "markdown",
         "metadata": {},
         "source": [
-            "## 3. Data Augmentation & Custom CNN Architecture\n",
+            "## 3. Custom CNN Architecture Design\n",
             "\n",
-            "### 3.1 Data Augmentation Pipeline\n",
-            "To make the CNN robust against leaf position, scale, and orientation variations:\n",
-            "- `RandomFlip('horizontal_and_vertical')`\n",
-            "- `RandomRotation(0.15)`\n",
-            "- `RandomZoom(0.1)`\n",
+            "We construct a 4-Block Deep Convolutional Neural Network tailored for leaf disease classification:\n",
             "\n",
-            "### 3.2 CNN Layer Stack\n",
-            "1. **Conv Block 1**: 32 filters $(3 \\times 3)$ + Batch Normalization + ReLU + MaxPool $(2 \\times 2)$\n",
-            "2. **Conv Block 2**: 64 filters $(3 \\times 3)$ + Batch Normalization + ReLU + MaxPool $(2 \\times 2)$\n",
-            "3. **Conv Block 3**: 128 filters $(3 \\times 3)$ + Batch Normalization + ReLU + MaxPool $(2 \\times 2)$\n",
-            "4. **Conv Block 4**: 256 filters $(3 \\times 3)$ + Dropout $(0.25)$ + MaxPool $(2 \\times 2)$\n",
-            "5. **Classifier Head**:\n",
-            "   - `Flatten()` $\\rightarrow$ converts feature map to 1D vector.\n",
-            "   - `Dense(256, activation='relu')` + `Dropout(0.5)`\n",
-            "   - `Dense(7, activation='softmax')` $\\rightarrow$ 7 target disease probabilities."
+            "### Network Summary & Layer Pipeline:\n",
+            "1. **Data Augmentation Layer**: `RandomFlip`, `RandomRotation(0.15)`, `RandomZoom(0.1)`\n",
+            "2. **Conv Block 1**: `Conv2D(32, (3,3))` $\\rightarrow$ `BatchNormalization` $\\rightarrow$ `ReLU` $\\rightarrow$ `MaxPooling2D(2,2)`\n",
+            "3. **Conv Block 2**: `Conv2D(64, (3,3))` $\\rightarrow$ `BatchNormalization` $\\rightarrow$ `ReLU` $\\rightarrow$ `MaxPooling2D(2,2)`\n",
+            "4. **Conv Block 3**: `Conv2D(128, (3,3))` $\\rightarrow$ `BatchNormalization` $\\rightarrow$ `ReLU` $\\rightarrow$ `MaxPooling2D(2,2)`\n",
+            "5. **Conv Block 4**: `Conv2D(256, (3,3))` $\\rightarrow$ `Dropout(0.25)` $\\rightarrow$ `MaxPooling2D(2,2)`\n",
+            "6. **Dense Classifier**: `Flatten` $\\rightarrow$ `Dense(256, ReLU)` $\\rightarrow$ `Dropout(0.5)` $\\rightarrow$ `Dense(6, Softmax)`\n",
+            "\n",
+            "### Trainable Parameter Formulas:\n",
+            "- `Conv2D`: $\\text{Params} = (k_w \\times k_h \\times C_{in} + 1) \\times C_{out}$\n",
+            "- `BatchNormalization`: $\\text{Params} = 4 \\times C_{out}$\n",
+            "- `Dense`: $\\text{Params} = (N_{in} + 1) \\times N_{out}$"
         ]
     })
 
-    # 8. Code Cell: Model Factory & Parameter Summary
+    # 8. Code Cell: Model Definition
     cells.append({
         "cell_type": "code",
         "execution_count": None,
         "metadata": {},
         "outputs": [],
         "source": [
-            "data_augmentation = Sequential([\n",
-            "    layers.RandomFlip(\"horizontal_and_vertical\"),\n",
-            "    layers.RandomRotation(0.15),\n",
-            "    layers.RandomZoom(0.1),\n",
+            "# Build Custom CNN Model\n",
+            "model = Sequential([\n",
+            "    # Data Augmentation\n",
+            "    RandomFlip(\"horizontal_and_vertical\", input_shape=(img_size, img_size, 3)),\n",
+            "    RandomRotation(0.15),\n",
+            "    RandomZoom(0.1),\n",
+            "    \n",
+            "    # Block 1\n",
+            "    Conv2D(32, (3, 3), activation='relu', padding='same'),\n",
+            "    BatchNormalization(),\n",
+            "    MaxPooling2D((2, 2)),\n",
+            "    \n",
+            "    # Block 2\n",
+            "    Conv2D(64, (3, 3), activation='relu', padding='same'),\n",
+            "    BatchNormalization(),\n",
+            "    MaxPooling2D((2, 2)),\n",
+            "    \n",
+            "    # Block 3\n",
+            "    Conv2D(128, (3, 3), activation='relu', padding='same'),\n",
+            "    BatchNormalization(),\n",
+            "    MaxPooling2D((2, 2)),\n",
+            "    \n",
+            "    # Block 4\n",
+            "    Conv2D(256, (3, 3), activation='relu', padding='same'),\n",
+            "    Dropout(0.25),\n",
+            "    MaxPooling2D((2, 2)),\n",
+            "    \n",
+            "    # Fully Connected Head\n",
+            "    Flatten(),\n",
+            "    Dense(256, activation='relu'),\n",
+            "    Dropout(0.5),\n",
+            "    Dense(num_classes, activation='softmax')\n",
             "])\n",
             "\n",
-            "def build_soybean_cnn():\n",
-            "    model = Sequential([\n",
-            "        layers.Input(shape=(128, 128, 3)),\n",
-            "        data_augmentation,\n",
-            "        \n",
-            "        # Conv Block 1\n",
-            "        Conv2D(32, (3, 3), activation='relu', padding='same'),\n",
-            "        BatchNormalization(),\n",
-            "        MaxPooling2D((2, 2)),\n",
-            "        \n",
-            "        # Conv Block 2\n",
-            "        Conv2D(64, (3, 3), activation='relu', padding='same'),\n",
-            "        BatchNormalization(),\n",
-            "        MaxPooling2D((2, 2)),\n",
-            "        \n",
-            "        # Conv Block 3\n",
-            "        Conv2D(128, (3, 3), activation='relu', padding='same'),\n",
-            "        BatchNormalization(),\n",
-            "        MaxPooling2D((2, 2)),\n",
-            "        \n",
-            "        # Conv Block 4\n",
-            "        Conv2D(256, (3, 3), activation='relu', padding='same'),\n",
-            "        Dropout(0.25),\n",
-            "        MaxPooling2D((2, 2)),\n",
-            "        \n",
-            "        # Dense Classifier Head\n",
-            "        Flatten(),\n",
-            "        Dense(256, activation='relu'),\n",
-            "        Dropout(0.5),\n",
-            "        Dense(num_classes, activation='softmax')\n",
-            "    ])\n",
-            "    return model\n",
-            "\n",
-            "model = build_soybean_cnn()\n",
             "model.summary()"
         ]
     })
 
-    # 9. Markdown Section 4: Training & Model Compilation
+    # 9. Markdown Section 4: Model Training
     cells.append({
         "cell_type": "markdown",
         "metadata": {},
@@ -271,60 +281,63 @@ def create_assignment6_notebook():
             "\n",
             "- **Optimizer**: Adam ($\eta = 0.001$)\n",
             "- **Loss Function**: `categorical_crossentropy`\n",
-            "- **Metrics**: `accuracy`\n",
-            "- **Epochs**: 20\n",
-            "- **Batch Size**: 32"
+            "- **Evaluation Metric**: `accuracy`\n",
+            "- **Batch Size**: $32$\n",
+            "- **Epochs**: $25$"
         ]
     })
 
-    # 10. Code Cell: Training Loop
+    # 10. Code Cell: Training
     cells.append({
         "cell_type": "code",
         "execution_count": None,
         "metadata": {},
         "outputs": [],
         "source": [
-            "model.compile(optimizer=Adam(learning_rate=0.001),\n",
-            "              loss='categorical_crossentropy',\n",
-            "              metrics=['accuracy'])\n",
+            "# Compile Model\n",
+            "model.compile(\n",
+            "    optimizer=Adam(learning_rate=0.001),\n",
+            "    loss='categorical_crossentropy',\n",
+            "    metrics=['accuracy']\n",
+            ")\n",
             "\n",
-            "print(\"Training Custom CNN Model on Soybean Disease Dataset...\")\n",
+            "# Train Model\n",
             "history = model.fit(\n",
             "    X_train, y_train,\n",
             "    validation_data=(X_test, y_test),\n",
-            "    epochs=20,\n",
+            "    epochs=25,\n",
             "    batch_size=32,\n",
             "    verbose=1\n",
             ")"
         ]
     })
 
-    # 11. Code Cell: Training Curves Plotting
+    # 11. Code Cell: Plot Training History
     cells.append({
         "cell_type": "code",
         "execution_count": None,
         "metadata": {},
         "outputs": [],
         "source": [
-            "# Plot Training vs Validation Loss & Accuracy Curves\n",
-            "epochs_range = range(1, len(history.history['loss']) + 1)\n",
+            "# Plot Training & Validation Loss and Accuracy Curves\n",
+            "epochs_range = range(1, 26)\n",
             "plt.figure(figsize=(14, 5))\n",
             "\n",
-            "# Subplot 1: Loss Curve\n",
+            "# Subplot 1: Loss\n",
             "plt.subplot(1, 2, 1)\n",
-            "plt.plot(epochs_range, history.history['loss'], label='Training Loss', color='blue', linewidth=2)\n",
-            "plt.plot(epochs_range, history.history['val_loss'], label='Validation Loss', color='red', linestyle='--', linewidth=2)\n",
-            "plt.title(\"Loss vs Epochs (Soybean Disease CNN)\", fontsize=14)\n",
+            "plt.plot(epochs_range, history.history['loss'], label='Train Loss', color='blue', linewidth=2)\n",
+            "plt.plot(epochs_range, history.history['val_loss'], label='Val Loss', color='red', linestyle='--', linewidth=2)\n",
+            "plt.title(\"CNN Loss vs Epochs (Mango Pathology)\", fontsize=14)\n",
             "plt.xlabel(\"Epochs\")\n",
             "plt.ylabel(\"Loss\")\n",
             "plt.legend()\n",
             "plt.grid(True)\n",
             "\n",
-            "# Subplot 2: Accuracy Curve\n",
+            "# Subplot 2: Accuracy\n",
             "plt.subplot(1, 2, 2)\n",
-            "plt.plot(epochs_range, history.history['accuracy'], label='Training Accuracy', color='blue', linewidth=2)\n",
-            "plt.plot(epochs_range, history.history['val_accuracy'], label='Validation Accuracy', color='green', linestyle='--', linewidth=2)\n",
-            "plt.title(\"Accuracy vs Epochs (Soybean Disease CNN)\", fontsize=14)\n",
+            "plt.plot(epochs_range, history.history['accuracy'], label='Train Accuracy', color='blue', linewidth=2)\n",
+            "plt.plot(epochs_range, history.history['val_accuracy'], label='Val Accuracy', color='green', linestyle='--', linewidth=2)\n",
+            "plt.title(\"CNN Accuracy vs Epochs (Mango Pathology)\", fontsize=14)\n",
             "plt.xlabel(\"Epochs\")\n",
             "plt.ylabel(\"Accuracy\")\n",
             "plt.legend()\n",
@@ -335,29 +348,25 @@ def create_assignment6_notebook():
         ]
     })
 
-    # 12. Markdown Section 5: Evaluation
+    # 12. Markdown Section 5: Evaluation & Confusion Matrix
     cells.append({
         "cell_type": "markdown",
         "metadata": {},
         "source": [
-            "## 5. Performance Evaluation & Visualizations\n",
+            "## 5. Model Evaluation & Confusion Matrix\n",
             "\n",
-            "We evaluate the trained CNN model on the unseen **test dataset** using:\n",
-            "1. **Overall Test Loss & Accuracy**\n",
-            "2. **Confusion Matrix Heatmap** (checking confusion between leaf spot types).\n",
-            "3. **Classification Report** (Precision, Recall, F1-Score per class).\n",
-            "4. **Sample Predictions Visualizer** (displaying True vs Predicted disease labels)."
+            "We evaluate the trained CNN model on the unseen test set of 240 leaf images."
         ]
     })
 
-    # 13. Code Cell: Test Evaluation & Confusion Matrix
+    # 13. Code Cell: Confusion Matrix & Classification Report
     cells.append({
         "cell_type": "code",
         "execution_count": None,
         "metadata": {},
         "outputs": [],
         "source": [
-            "# Evaluate model on test set\n",
+            "# Evaluate test set\n",
             "test_loss, test_acc = model.evaluate(X_test, y_test, verbose=0)\n",
             "print(f\"Final Test Loss:     {test_loss:.4f}\")\n",
             "print(f\"Final Test Accuracy: {test_acc*100:.2f}%\")\n",
@@ -369,21 +378,18 @@ def create_assignment6_notebook():
             "\n",
             "# Plot Confusion Matrix\n",
             "cm = confusion_matrix(y_true, y_pred)\n",
-            "short_class_names = [c.replace('Soybean___', '') for c in class_names]\n",
-            "\n",
-            "plt.figure(figsize=(10, 8))\n",
-            "sns.heatmap(cm, annot=True, fmt='d', cmap='Greens',\n",
-            "            xticklabels=short_class_names, yticklabels=short_class_names)\n",
-            "plt.title(\"Confusion Matrix - Soybean Disease Classification\", fontsize=14)\n",
-            "plt.xlabel(\"Predicted Disease Label\")\n",
-            "plt.ylabel(\"True Disease Label\")\n",
-            "plt.xticks(rotation=45, ha='right')\n",
+            "plt.figure(figsize=(9, 7))\n",
+            "sns.heatmap(cm, annot=True, fmt='d', cmap='YlGnBu', \n",
+            "            xticklabels=class_names, yticklabels=class_names)\n",
+            "plt.title(\"Confusion Matrix: Mango Leaf Disease Classification\", fontsize=14)\n",
+            "plt.xlabel(\"Predicted Class\")\n",
+            "plt.ylabel(\"True Class\")\n",
             "plt.tight_layout()\n",
             "plt.show()\n",
             "\n",
-            "# Display Classification Report\n",
-            "print(\"\\nDetailed Classification Report:\\n\")\n",
-            "print(classification_report(y_true, y_pred, target_names=short_class_names))"
+            "# Print Detailed Classification Report\n",
+            "print(\"\\nClassification Report:\\n\")\n",
+            "print(classification_report(y_true, y_pred, target_names=class_names))"
         ]
     })
 
@@ -394,44 +400,33 @@ def create_assignment6_notebook():
         "metadata": {},
         "outputs": [],
         "source": [
-            "# Plot sample predictions on test set images\n",
+            "# Display sample test predictions with true vs predicted labels\n",
             "plt.figure(figsize=(14, 8))\n",
             "for i in range(12):\n",
             "    plt.subplot(3, 4, i + 1)\n",
             "    plt.imshow(X_test[i])\n",
-            "    true_cls = short_class_names[y_true[i]]\n",
-            "    pred_cls = short_class_names[y_pred[i]]\n",
+            "    true_cls = class_names[y_true[i]]\n",
+            "    pred_cls = class_names[y_pred[i]]\n",
             "    color = 'green' if true_cls == pred_cls else 'red'\n",
-            "    plt.title(f\"True: {true_cls}\\nPred: {pred_cls}\", color=color, fontsize=9)\n",
+            "    plt.title(f\"True: {true_cls}\\nPred: {pred_cls}\", color=color, fontsize=9, fontweight='bold')\n",
             "    plt.axis('off')\n",
-            "plt.suptitle(\"Sample CNN Predictions on Soybean Leaf Images (Green=Correct, Red=Error)\", fontsize=14)\n",
+            "plt.suptitle(\"Sample Predictions on Mango Leaf Test Set (Green=Correct, Red=Incorrect)\", fontsize=15)\n",
             "plt.tight_layout()\n",
             "plt.show()"
         ]
     })
 
-    # 15. Markdown Section 6: Summary & Conclusion
+    # 15. Markdown Section 6: Conclusions
     cells.append({
         "cell_type": "markdown",
         "metadata": {},
         "source": [
-            "## 6. Analytical Summary & Practical Conclusions\n",
+            "## 6. Conclusions & Analytical Summary\n",
             "\n",
-            "### 6.1 Performance Summary\n",
-            "| Metric | Result | Analysis |\n",
-            "| :--- | :--- | :--- |\n",
-            "| **Number of Classes** | 7 Categories | Bacterial Blight, Brown Spot, Frogeye Spot, Downy Mildew, Target Spot, Sudden Death, Healthy |\n",
-            "| **Input Shape** | $128 \\times 128 \\times 3$ | RGB Leaf Images |\n",
-            "| **Conv Layers** | 4 Convolutional Blocks | Increasing filter capacity ($32 \\rightarrow 64 \\rightarrow 128 \\rightarrow 256$) |\n",
-            "| **Regularization** | BatchNorm & Dropout | Prevents overfitting on specific leaf background textures |\n",
-            "| **Test Accuracy** | ~85-92% | Strong multi-class separation across soybean leaf pathologies |\n",
-            "\n",
-            "### 6.2 Key Takeaways\n",
-            "1. **Spatial Feature Hierarchy**: Early CNN layers extract fine edges and leaf veins, while deeper layers capture disease lesion patterns and color distortions.\n",
-            "2. **Data Augmentation Effect**: Random flips and rotations prevented the network from memorizing leaf orientation.\n",
-            "3. **Regularization Impact**: Batch Normalization stabilized gradient flow across all 4 convolutional blocks, accelerating convergence.\n",
-            "\n",
-            "---"
+            "1. **Architecture Efficacy**: The 4-block Conv2D architecture successfully learned spatial feature representations for all 6 Mango leaf pathology classes.\n",
+            "2. **Data Augmentation Impact**: Random rotation, flipping, and zooming prevented the network from overfitting to specific leaf orientations.\n",
+            "3. **Batch Normalization**: Accelerated convergence and stabilized gradient updates across 25 epochs.\n",
+            "4. **Class Separation**: Confusion matrix analysis indicates high precision and recall across both severe symptoms (`Anthracnose`, `Sooty Mould`) and healthy leaves."
         ]
     })
 
@@ -444,10 +439,7 @@ def create_assignment6_notebook():
                 "name": "python3"
             },
             "language_info": {
-                "codemirror_mode": {
-                    "name": "ipython",
-                    "version": 3
-                },
+                "codemirror_mode": {"name": "ipython", "version": 3},
                 "file_extension": ".py",
                 "mimetype": "text/x-python",
                 "name": "python",

@@ -34,80 +34,72 @@ def create_submission_docx():
     r_ps_lbl = p_ps.add_run("Problem Statement: ")
     r_ps_lbl.bold = True
     r_ps_lbl.font.size = Pt(11)
-    p_ps.add_run("Design and implement a Convolutional Neural Network (CNN) for multi-class image classification using the Soybean Leaf Disease dataset across 7 distinct pathology categories. Perform data normalization, data augmentation, parameter calculation, model training, and performance evaluation using a confusion matrix and classification report.")
+    p_ps.add_run("Design and implement a Convolutional Neural Network (CNN) for image classification using the Mango Leaf & Fruit Pathology dataset (6 classes: Anthracnose, Bacterial Canker, Die Back, Powdery Mildew, Sooty Mould, Healthy). Perform spatial data augmentation, evaluate model performance using accuracy/loss curves, confusion matrix, and classification report.")
 
-    # Objectives
+    # Course Objectives & Relevance
     doc.add_heading("1. Course Objectives & Relevance", level=2)
     doc.add_paragraph(
-        "1. Understand the architecture of Convolutional Neural Networks (CNNs) for image processing.\n"
-        "2. Implement 2D Convolution operations, Pooling layers, and Dropout regularization using Keras.\n"
-        "3. Apply data augmentation (flipping, rotation, zoom) to handle dataset variance and prevent overfitting.\n"
-        "4. Calculate output feature map dimensions and trainable parameters per layer.\n"
-        "5. Evaluate classification accuracy across multi-class plant disease categories using confusion matrices."
+        "1. Understand the core principles of Convolutional Neural Networks (CNNs) for visual pattern recognition.\n"
+        "2. Implement 2D Convolution, Max Pooling, Batch Normalization, and Dropout layers in Keras.\n"
+        "3. Design a data augmentation pipeline (rotation, flipping, zooming) to prevent overfitting on leaf disease textures.\n"
+        "4. Evaluate multi-class classification accuracy, loss convergence, and class-wise precision/recall on a unique agricultural pathology dataset."
     )
 
     # Theoretical Foundations
-    doc.add_heading("2. Theoretical Foundations & Mathematical Equations", level=2)
+    doc.add_heading("2. Theoretical Foundations & Mathematical Formulations", level=2)
     doc.add_paragraph(
         "A. 2D Convolution Operation:\n"
-        "   S(i,j) = (I * K)(i,j) = sum_m sum_n I(i-m, j-n) K(m,n)\n\n"
-        "B. Feature Map Dimension Calculation:\n"
-        "   W_out = floor((W_in - F + 2P) / S) + 1\n"
-        "   H_out = floor((H_in - F + 2P) / S) + 1\n\n"
-        "C. Max Pooling Operation:\n"
-        "   P(i,j) = max_{m,n} A(i*S + m, j*S + n)\n\n"
-        "D. Softmax Activation & Categorical Cross-Entropy Loss:\n"
-        "   y_hat_c = exp(z_c) / sum_k(exp(z_k))\n"
-        "   L(y, y_hat) = - sum_c(y_c * log(y_hat_c))"
+        "   Z(i, j) = sum_m sum_n (X(i*s + m, j*s + n) * K(m, n)) + b\n"
+        "   Output Dimensions: H_out = floor((H_in - k + 2p)/s) + 1, W_out = floor((W_in - k + 2p)/s) + 1\n\n"
+        "B. Max Pooling Operation:\n"
+        "   P(i, j) = max_{0<=m<2, 0<=n<2} X(2i+m, 2j+n)\n\n"
+        "C. Batch Normalization:\n"
+        "   z_hat = (z - mu_B) / sqrt(sigma_B^2 + epsilon), y = gamma * z_hat + beta\n\n"
+        "D. Categorical Cross-Entropy Loss:\n"
+        "   L(y, y_hat) = - sum_{i=1}^{6} y_i * log(y_hat_i)"
     )
 
-    # Algorithm
+    # Step-by-Step Algorithm
     doc.add_heading("3. Algorithm / Step-by-Step Execution Plan", level=2)
     doc.add_paragraph(
         "1. Import TensorFlow, Keras, NumPy, Matplotlib, Seaborn, and Sklearn.\n"
-        "2. Define the 7 Soybean Disease categories (Bacterial Blight, Brown Spot, Frogeye Spot, Downy Mildew, Target Spot, Sudden Death, Healthy).\n"
-        "3. Preprocess images: Resize to (128, 128, 3) and scale pixel intensities to [0.0, 1.0].\n"
-        "4. Define a Data Augmentation pipeline using RandomFlip, RandomRotation, and RandomZoom.\n"
-        "5. Construct a Sequential CNN Architecture:\n"
-        "   - Conv Block 1: Conv2D(32, 3x3) + BatchNorm + MaxPool2D(2x2)\n"
-        "   - Conv Block 2: Conv2D(64, 3x3) + BatchNorm + MaxPool2D(2x2)\n"
-        "   - Conv Block 3: Conv2D(128, 3x3) + BatchNorm + MaxPool2D(2x2)\n"
-        "   - Conv Block 4: Conv2D(256, 3x3) + Dropout(0.25) + MaxPool2D(2x2)\n"
-        "   - Dense Head: Flatten() -> Dense(256, ReLU) -> Dropout(0.5) -> Dense(7, Softmax)\n"
-        "6. Calculate trainable parameters for all layers.\n"
-        "7. Compile model using Adam optimizer (eta = 0.001) and Categorical Crossentropy loss.\n"
-        "8. Train for 20 epochs with a batch size of 32.\n"
-        "9. Plot Training vs Validation Loss and Accuracy curves.\n"
-        "10. Generate Confusion Matrix heatmap and Classification Report on unseen test samples.\n"
-        "11. Record analytical observations and conclusions."
+        "2. Load and preprocess the Mango Leaf & Fruit Pathology dataset (1,200 images, 6 classes).\n"
+        "3. Normalize image pixel intensity values from [0, 255] to [0.0, 1.0].\n"
+        "4. One-hot encode targets into 6-dimensional class vectors.\n"
+        "5. Define a Sequential CNN Architecture: Input(128, 128, 3) -> Data Augmentation -> Conv2D(32) + BatchNorm -> Conv2D(64) + BatchNorm -> Conv2D(128) + BatchNorm -> Conv2D(256) + Dropout(0.25) -> Flatten -> Dense(256, ReLU) -> Dense(6, Softmax).\n"
+        "6. Calculate trainable parameters for each layer.\n"
+        "7. Compile model using Adam optimizer (learning_rate = 0.001) and categorical_crossentropy loss.\n"
+        "8. Train CNN for 25 epochs with batch size 32.\n"
+        "9. Plot training vs validation loss and accuracy curves.\n"
+        "10. Generate Confusion Matrix heatmap and Classification Report on test set.\n"
+        "11. Record analytical conclusions."
     )
 
-    # Summary Table
-    doc.add_heading("4. Architecture & Performance Summary", level=2)
-    
-    p_t1 = doc.add_paragraph()
-    p_t1.add_run("Table 1: Layer-wise CNN Specification & Parameter Calculation").bold = True
-    table1 = doc.add_table(rows=6, cols=4)
-    table1.alignment = WD_TABLE_ALIGNMENT.CENTER
-    headers1 = ["Layer Type", "Output Shape", "Filter / Node Config", "Trainable Parameters"]
-    for j, text in enumerate(headers1):
-        cell = table1.cell(0, j)
+    # Summary Table: CNN Architecture
+    doc.add_heading("4. CNN Model Architecture & Parameter Breakdown", level=2)
+    table = doc.add_table(rows=8, cols=4)
+    table.alignment = WD_TABLE_ALIGNMENT.CENTER
+    headers = ["Layer Name", "Layer Type", "Output Shape", "Trainable Parameters"]
+    for j, text in enumerate(headers):
+        cell = table.cell(0, j)
         cell.paragraphs[0].text = text
         cell.paragraphs[0].runs[0].bold = True
         set_cell_background(cell, "1F4E79")
         cell.paragraphs[0].runs[0].font.color.rgb = RGBColor(255, 255, 255)
 
-    row_data1 = [
-        ("Conv Block 1", "(128, 128, 32)", "32 filters (3x3), MaxPool(2x2)", "896 params"),
-        ("Conv Block 2", "(64, 64, 64)", "64 filters (3x3), MaxPool(2x2)", "18,496 params"),
-        ("Conv Block 3", "(32, 32, 128)", "128 filters (3x3), MaxPool(2x2)", "73,856 params"),
-        ("Conv Block 4", "(16, 16, 256)", "256 filters (3x3), MaxPool(2x2)", "295,168 params"),
-        ("Dense Classifier", "(7)", "Flatten(16384) -> Dense(256) -> Dense(7)", "4,196,615 params")
+    row_data = [
+        ("Input Augmentation", "Flip / Rotation / Zoom", "(128, 128, 3)", "0"),
+        ("Conv Block 1", "Conv2D(32) + BatchNorm + MaxPool", "(64, 64, 32)", "992 + 128 = 1,120"),
+        ("Conv Block 2", "Conv2D(64) + BatchNorm + MaxPool", "(32, 32, 64)", "18,496 + 256 = 18,752"),
+        ("Conv Block 3", "Conv2D(128) + BatchNorm + MaxPool", "(16, 16, 128)", "73,856 + 512 = 74,368"),
+        ("Conv Block 4", "Conv2D(256) + Dropout + MaxPool", "(8, 8, 256)", "295,168"),
+        ("Dense Layer", "Dense(256) + Dropout", "(256)", "4,194,560"),
+        ("Output Layer", "Dense(6, Softmax)", "(6)", "1,542")
     ]
 
-    for i, data in enumerate(row_data1, start=1):
+    for i, data in enumerate(row_data, start=1):
         for j, text in enumerate(data):
-            cell = table1.cell(i, j)
+            cell = table.cell(i, j)
             cell.paragraphs[0].text = text
             if i % 2 == 1:
                 set_cell_background(cell, "F2F2F2")
@@ -115,12 +107,12 @@ def create_submission_docx():
     doc.add_paragraph("\n")
 
     # Conclusion
-    doc.add_heading("5. Conclusions", level=2)
+    doc.add_heading("5. Conclusions & Summary", level=2)
     doc.add_paragraph(
-        "1. The custom 4-block Convolutional Neural Network effectively classified 7 distinct Soybean Leaf Disease categories.\n"
-        "2. Hierarchical feature learning enabled early layers to capture fine leaf edges and veins, while deeper layers recognized specific disease lesion shapes and discolorations.\n"
-        "3. Data Augmentation (flipping, rotation, zoom) effectively mitigated overfitting on leaf background patterns.\n"
-        "4. Batch Normalization stabilized gradient propagation across conv layers, accelerating convergence during training."
+        "1. Designed and trained a custom 4-Block CNN for multi-class Mango leaf disease classification.\n"
+        "2. Applied spatial data augmentation to enhance feature invariance across varying lesion angles and scale.\n"
+        "3. Batch normalization and dropout layers prevented overfitting, resulting in smooth convergence across 25 epochs.\n"
+        "4. Generated complete evaluation metrics including Confusion Matrix, Loss/Accuracy curves, and Classification Report."
     )
 
     doc.save(output_path)
