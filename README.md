@@ -18,6 +18,8 @@ The repository is structured by assignment. Each folder contains the Jupyter Not
   * Deep Neural Network on CIFAR-10. Analyzes the impact of varying learning rates and epoch counts on model convergence.
 * **[Assignment 4: LSTM Time-Series Forecasting](./Ass4/EXPLANATION.md)**
   * Recurrent Neural Network built with Keras Functional API. Uses historical Apple (AAPL) stock data to predict future closing prices via Long Short-Term Memory cells.
+* **[Assignment 5: Sequence Classification (RNN vs LSTM vs GRU)](./Ass5/EXPLANATION.md)**
+  * Evaluates and compares performance across three major Recurrent Neural Network architectures on a sentiment analysis dataset (Amazon Alexa Reviews) using PyTorch.
 * **[Assignment 6: Custom CNN for Image Classification](./Ass6/EXPLANATION.md)**
   * A 4-block Convolutional Neural Network with data augmentation to classify a unique Mango Leaf & Fruit Pathology dataset.
 
