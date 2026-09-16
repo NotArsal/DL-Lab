@@ -22,6 +22,8 @@ The repository is structured by assignment. Each folder contains the Jupyter Not
   * Evaluates and compares performance across three major Recurrent Neural Network architectures on a sentiment analysis dataset (Amazon Alexa Reviews) using PyTorch.
 * **[Assignment 6: Custom CNN for Image Classification](./Ass6/EXPLANATION.md)**
   * A 4-block Convolutional Neural Network with data augmentation to classify a unique Mango Leaf & Fruit Pathology dataset.
+* **[Assignment 7: Transfer Learning (AlexNet, VGG16, ResNet50, EfficientNetB0)](./Ass7/EXPLANATION.md)**
+  * Reusing ImageNet-pretrained CNN feature extractors by freezing early layers and fine-tuning standard architectural heads on new image domains.
 
 ## 🛠️ Typical Folder Layout
 
