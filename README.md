@@ -14,6 +14,8 @@ The repository is structured by assignment. Each folder contains the Jupyter Not
   * Environment setup, TensorFlow/Keras basics, and data normalization using the Fashion MNIST dataset.
 * **[Assignment 2: Perceptron Implementation](./Ass2/EXPLANATION.md)**
   * Single-Layer Perceptron built from scratch using NumPy to understand weights, biases, and activation functions.
+* **[Assignment 2.2: Multilayer Perceptron](./Ass2_2/EXPLANATION.md)**
+  * Deep Feedforward MLP implemented using PyTorch on the Wine dataset, evaluating via accuracy metrics and a confusion matrix.
 * **[Assignment 3: Forward/Backpropagation & Hyperparameters](./Ass3/EXPLANATION.md)**
   * Deep Neural Network on CIFAR-10. Analyzes the impact of varying learning rates and epoch counts on model convergence.
 * **[Assignment 4: LSTM Time-Series Forecasting](./Ass4/EXPLANATION.md)**
